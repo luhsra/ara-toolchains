@@ -11,11 +11,15 @@ py3_inst = py3_mod.find_installation('python3')
 llvm_dep = dependency('llvm', method: 'config-tool', include_type: 'system')
 llvm_bindir = llvm_dep.get_variable(configtool: 'bindir')
 llc = find_program(llvm_bindir / 'llc')
+llvm_objcopy = find_program(llvm_bindir / 'llvm-objcopy')
+clang = find_program(llvm_bindir / 'clang')
+clangpp = find_program(llvm_bindir / 'clang++')
+
 llvm_targets = files('llvm_targets.py')
 
 # ARM toolchain
 if not get_option('enable_arm').disabled()
-  arm_triple = 'arm_none_eabi'
+  arm_triple = 'arm-none-eabi'
   arm_toolchain = true
   errors = []
 
