@@ -47,8 +47,12 @@ if not get_option('enable_arm').disabled()
   endif
 
 
-  # gcc libs
-  arm_gcc = find_program('arm-none-eabi-gcc')
+  # gcc tools and libs
+  tools = ['gcc', 'ar', 'ranlib', 'c++']
+  foreach tool : tools
+    set_variable('arm_' + tool.underscorify(), find_program(arm_triple + '-' + tool))
+  endforeach
+
   gcc_version = files('gcc_version.py') # drop, when https://github.com/mesonbuild/meson/issues/7166 is resolved
   if get_option('arm_gcc_version') == 'default'
     r = run_command(py3_inst, gcc_version, arm_gcc.path(), check: true)
