@@ -31,7 +31,7 @@ if not get_option('enable_arm').disabled()
   test = fs.exists(arm_include_path)
   arm_toolchain = arm_toolchain and test
   if not test
-    errors += 'arm_include_dir (@0@) is not a valid directory.'.format(arm_include_path)
+    errors += f'arm_include_dir (@arm_include_path@) is not a valid directory.'
   endif
 
   # lib path
@@ -40,12 +40,12 @@ if not get_option('enable_arm').disabled()
   test = fs.exists(arm_link_path)
   arm_toolchain = arm_toolchain and test
   if not test
-    errors += 'arm_lib_dir (@0@) is not a valid directory.'.format(arm_link_path)
+    errors += f'arm_lib_dir (@arm_link_path@) is not a valid directory.'
   endif
   test = fs.exists(arm_link_path / 'libc.a')
   arm_toolchain = arm_toolchain and test
   if not test
-    errors += 'arm_lib_dir (@0@) does not contain a libc.a.'.format(arm_link_path)
+    errors += f'arm_lib_dir (@arm_link_path@) does not contain a libc.a.'
   endif
 
 
@@ -69,7 +69,7 @@ if not get_option('enable_arm').disabled()
   libgcc_dir = get_option('arm_gcc_dir').format(gcc_arm_version)
   gcc_dir_error = ''
   if not fs.exists(libgcc_dir)
-    gcc_dir_error = '\nlibgcc_dir (@0@) is not a valid directory.'.format(libgcc_dir)
+    gcc_dir_error = f'\nlibgcc_dir (@libgcc_dir@) is not a valid directory.'
     libgcc_dir = get_option('arm_gcc_dir').format(gcc_arm_major_version)
   endif
 
@@ -77,13 +77,13 @@ if not get_option('enable_arm').disabled()
   test = fs.exists(libgcc_dir)
   arm_toolchain = arm_toolchain and test
   if not test
-    errors += 'libgcc_dir (@0@) is not a valid directory.'.format(libgcc_dir) + gcc_dir_error
+    errors += f'libgcc_dir (@libgcc_dir@) is not a valid directory.' + gcc_dir_error
   endif
 
   test = fs.exists(libgcc_dir / 'libgcc.a')
   arm_toolchain = arm_toolchain and test
   if not test
-    errors += 'libgcc_dir (@0@) does not contain libgcc.a.'.format(libgcc_dir)
+    errors += f'libgcc_dir (@libgcc_dir@) does not contain libgcc.a.'
   endif
 
   # llvm handling
