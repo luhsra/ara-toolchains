@@ -86,6 +86,20 @@ if not get_option('enable_arm').disabled()
     errors += f'libgcc_dir (@libgcc_dir@) does not contain libgcc.a.'
   endif
 
+  # c++ library
+  gcc_cxx_include = libgcc_dir / 'include' / f'g++-v@gcc_arm_major_version@'
+  test = fs.exists(gcc_cxx_include)
+  arm_toolchain = arm_toolchain and test
+  if not test
+    errors += 'gcc_cxx_include (@gcc_cxx_include@) is not a valid directory.'
+  endif
+  test = fs.exists(gcc_cxx_include / 'iostream')
+  arm_toolchain = arm_toolchain and test
+  if not test
+    errors += 'gcc_cxx_include (@gcc_cxx_include@) does not contain iostream.'
+  endif
+
+
   # llvm handling
   wanted_llvm_targets = ['arm', 'arm64']
   r = run_command(
