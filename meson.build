@@ -50,7 +50,7 @@ if not get_option('enable_arm').disabled()
 
 
   # gcc tools and libs
-  tools = ['gcc', 'ar', 'ranlib', 'c++']
+  tools = ['gcc', 'ar', 'ranlib', 'c++', 'size', 'objcopy']
   foreach tool : tools
     set_variable('arm_' + tool.underscorify(), find_program(arm_triple + '-' + tool))
   endforeach
