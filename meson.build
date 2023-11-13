@@ -12,6 +12,8 @@ llvm_dep = dependency('llvm', method: 'config-tool', include_type: 'system')
 llvm_bindir = llvm_dep.get_variable(configtool: 'bindir')
 llc = find_program(llvm_bindir / 'llc')
 llvm_objcopy = find_program(llvm_bindir / 'llvm-objcopy')
+llvm_ld = find_program(llvm_bindir / 'lld')
+llvm_dis = find_program(llvm_bindir / 'llvm-dis')
 clang = find_program(llvm_bindir / 'clang')
 clangpp = find_program(llvm_bindir / 'clang++')
 
