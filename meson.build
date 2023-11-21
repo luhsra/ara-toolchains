@@ -7,6 +7,7 @@ fs = import('fs')
 py3_mod = import('python')
 py3_inst = py3_mod.find_installation('python3')
 
+# LLVM variables and tools
 # version is not specified, declare the same dependency in parrot before including the subproject to force a version
 llvm_dep = dependency('llvm', method: 'config-tool', include_type: 'system')
 llvm_bindir = llvm_dep.get_variable(configtool: 'bindir')
@@ -14,12 +15,23 @@ llc = find_program(llvm_bindir / 'llc')
 llvm_objcopy = find_program(llvm_bindir / 'llvm-objcopy')
 llvm_ld = find_program(llvm_bindir / 'lld')
 llvm_dis = find_program(llvm_bindir / 'llvm-dis')
+llvm_opt = find_program(llvm_bindir / 'opt')
 clang = find_program(llvm_bindir / 'clang')
 clangpp = find_program(llvm_bindir / 'clang++')
 
 llvm_targets = files('llvm_targets.py')
 
+# POSIX x86-64 toolchain
+enable_posix = false
+if not get_option('enable_posix').disabled()
+  # TODO, we currently hard depend on a build on POSIX
+  assert(host_machine.system() == 'linux', 'Build on a non Linux system is not supported.')
+  posix_ar = find_program('ar')
+  enable_posix = true
+endif
+
 # ARM toolchain
+enable_arm = false
 if not get_option('enable_arm').disabled()
   arm_triple = 'arm-none-eabi'
   arm_toolchain = true
@@ -50,7 +62,7 @@ if not get_option('enable_arm').disabled()
 
 
   # gcc tools and libs
-  tools = ['gcc', 'ar', 'ranlib', 'c++', 'size', 'objcopy']
+  tools = ['gcc', 'ar', 'ranlib', 'c++', 'size', 'objcopy', 'nm']
   foreach tool : tools
     set_variable('arm_' + tool.underscorify(), find_program(arm_triple + '-' + tool))
   endforeach
@@ -115,12 +127,14 @@ if not get_option('enable_arm').disabled()
 
   # TODO download toolchain if not found
   # see arm_toolchain.sh
+  enable_arm = true
   error_string = 'ARM toolchain not found. The following errors occured:\n@0@'.format('\n'.join(errors))
   if not arm_toolchain
     if get_option('enable_arm').enabled()
       error(error_string)
     else
       message(error_string)
+      enable_arm = false
     endif
   endif
 

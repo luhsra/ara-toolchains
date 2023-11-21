@@ -11,3 +11,7 @@ option('arm_gcc_dir', type: 'string', value: '/usr/lib/gcc/arm-none-eabi/@0@/', 
     description: 'The path to the GCC ARM toolchain. Note that @0@ is replaced with the arm_gcc_version. Only relevant, if arch==arm. (Sometimes need to remove trailing nofp/)')
 option('arm_gcc_version', type: 'string', value: 'default', yield: true,
     description: 'The version of the GCC cross compiler for ARM. The special value of "default" assumes the same version like the system GCC.')
+
+# posix, currently only supported as native build
+option('enable_posix', type: 'feature', value: 'auto', yield: true,
+  description: 'Only supported as native build (requires a Linux machine).')
