@@ -22,16 +22,16 @@ clangpp = find_program(llvm_bindir / 'clang++')
 llvm_targets = files('llvm_targets.py')
 
 # POSIX x86-64 toolchain
-enable_posix = false
+posix_enabled = false
 if not get_option('enable_posix').disabled()
   # TODO, we currently hard depend on a build on POSIX
   assert(host_machine.system() == 'linux', 'Build on a non Linux system is not supported.')
   posix_ar = find_program('ar')
-  enable_posix = true
+  posix_enabled = true
 endif
 
 # ARM toolchain
-enable_arm = false
+arm_enabled = false
 if not get_option('enable_arm').disabled()
   arm_triple = 'arm-none-eabi'
   arm_toolchain = true
@@ -127,14 +127,14 @@ if not get_option('enable_arm').disabled()
 
   # TODO download toolchain if not found
   # see arm_toolchain.sh
-  enable_arm = true
+  arm_enabled = true
   error_string = 'ARM toolchain not found. The following errors occured:\n@0@'.format('\n'.join(errors))
   if not arm_toolchain
-    if get_option('enable_arm').enabled()
+    if get_option('arm_enabled').enabled()
       error(error_string)
     else
       message(error_string)
-      enable_arm = false
+      arm_enabled = false
     endif
   endif
 
