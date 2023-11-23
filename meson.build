@@ -103,12 +103,12 @@ if not get_option('enable_arm').disabled()
   test = fs.exists(gcc_cxx_include)
   arm_toolchain = arm_toolchain and test
   if not test
-    errors += 'gcc_cxx_include (@gcc_cxx_include@) is not a valid directory.'
+    errors += f'gcc_cxx_include (@gcc_cxx_include@) is not a valid directory.'
   endif
   test = fs.exists(gcc_cxx_include / 'iostream')
   arm_toolchain = arm_toolchain and test
   if not test
-    errors += 'gcc_cxx_include (@gcc_cxx_include@) does not contain iostream.'
+    errors += f'gcc_cxx_include (@gcc_cxx_include@) does not contain iostream.'
   endif
 
 
@@ -130,7 +130,7 @@ if not get_option('enable_arm').disabled()
   arm_enabled = true
   error_string = 'ARM toolchain not found. The following errors occured:\n@0@'.format('\n'.join(errors))
   if not arm_toolchain
-    if get_option('arm_enabled').enabled()
+    if get_option('enable_arm').enabled()
       error(error_string)
     else
       message(error_string)
@@ -139,10 +139,12 @@ if not get_option('enable_arm').disabled()
   endif
 
   summary({
+    'ARM is enabled': arm_enabled,
     'ARM GCC': arm_gcc,
     'ARM GCC libraries': libgcc_dir,
     'ARM include directory': arm_include_path,
     'ARM linkage directory': arm_link_path,
     'LLVM supports @0@'.format(', '.join(wanted_llvm_targets)): true,
+    'POSIX is enabled': posix_enabled,
   })
 endif
