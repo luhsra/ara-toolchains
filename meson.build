@@ -13,7 +13,7 @@ llvm_dep = dependency('llvm', method: 'config-tool', include_type: 'system')
 llvm_bindir = llvm_dep.get_variable(configtool: 'bindir')
 llc = find_program(llvm_bindir / 'llc')
 llvm_objcopy = find_program(llvm_bindir / 'llvm-objcopy')
-llvm_ld = find_program(llvm_bindir / 'lld')
+llvm_ld = find_program(llvm_bindir / 'ld.lld')
 llvm_dis = find_program(llvm_bindir / 'llvm-dis')
 llvm_opt = find_program(llvm_bindir / 'opt')
 clang = find_program(llvm_bindir / 'clang')
@@ -31,6 +31,10 @@ if not get_option('enable_posix').disabled()
 endif
 
 # ARM toolchain
+arm_gcc = disabler()
+arm_libgcc_dir = disabler()
+arm_include_path = disabler()
+arm_link_path = disabler()
 arm_enabled = false
 if not get_option('enable_arm').disabled()
   arm_triple = 'arm-none-eabi'
@@ -78,28 +82,28 @@ if not get_option('enable_arm').disabled()
   else
     gcc_arm_version = get_option('arm_gcc_version')
   endif
-  libgcc_dir = get_option('arm_gcc_dir').format(gcc_arm_version)
+  arm_libgcc_dir = get_option('arm_gcc_dir').format(gcc_arm_version)
   gcc_dir_error = ''
-  if not fs.exists(libgcc_dir)
-    gcc_dir_error = f'\nlibgcc_dir (@libgcc_dir@) is not a valid directory.'
-    libgcc_dir = get_option('arm_gcc_dir').format(gcc_arm_major_version)
+  if not fs.exists(arm_libgcc_dir)
+    gcc_dir_error = f'\narm_libgcc_dir (@arm_libgcc_dir@) is not a valid directory.'
+    arm_libgcc_dir = get_option('arm_gcc_dir').format(gcc_arm_major_version)
   endif
 
   # tests
-  test = fs.exists(libgcc_dir)
+  test = fs.exists(arm_libgcc_dir)
   arm_toolchain = arm_toolchain and test
   if not test
-    errors += f'libgcc_dir (@libgcc_dir@) is not a valid directory.' + gcc_dir_error
+    errors += f'arm_libgcc_dir (@arm_libgcc_dir@) is not a valid directory.' + gcc_dir_error
   endif
 
-  test = fs.exists(libgcc_dir / 'libgcc.a')
+  test = fs.exists(arm_libgcc_dir / 'libgcc.a')
   arm_toolchain = arm_toolchain and test
   if not test
-    errors += f'libgcc_dir (@libgcc_dir@) does not contain libgcc.a.'
+    errors += f'arm_libgcc_dir (@arm_libgcc_dir@) does not contain libgcc.a.'
   endif
 
   # c++ library
-  gcc_cxx_include = libgcc_dir / 'include' / f'g++-v@gcc_arm_major_version@'
+  gcc_cxx_include = arm_libgcc_dir / 'include' / f'g++-v@gcc_arm_major_version@'
   test = fs.exists(gcc_cxx_include)
   arm_toolchain = arm_toolchain and test
   if not test
@@ -137,14 +141,14 @@ if not get_option('enable_arm').disabled()
       arm_enabled = false
     endif
   endif
-
-  summary({
-    'ARM is enabled': arm_enabled,
-    'ARM GCC': arm_gcc,
-    'ARM GCC libraries': libgcc_dir,
-    'ARM include directory': arm_include_path,
-    'ARM linkage directory': arm_link_path,
-    'LLVM supports @0@'.format(', '.join(wanted_llvm_targets)): true,
-    'POSIX is enabled': posix_enabled,
-  })
 endif
+
+summary({
+  'ARM is enabled': arm_enabled,
+  'ARM GCC': arm_gcc,
+  'ARM GCC libraries': arm_libgcc_dir,
+  'ARM include directory': arm_include_path,
+  'ARM linkage directory': arm_link_path,
+  'LLVM supports @0@'.format(', '.join(wanted_llvm_targets)): true,
+  'POSIX is enabled': posix_enabled,
+})
