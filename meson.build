@@ -13,7 +13,8 @@ llvm_dep = dependency('llvm', method: 'config-tool', include_type: 'system')
 llvm_bindir = llvm_dep.get_variable(configtool: 'bindir')
 llc = find_program(llvm_bindir / 'llc')
 llvm_objcopy = find_program(llvm_bindir / 'llvm-objcopy')
-llvm_ld = find_program(llvm_bindir / 'ld.lld')
+#llvm_ld = find_program(llvm_bindir / 'ld.lld')
+llvm_ar = find_program(llvm_bindir / 'llvm-ar')
 llvm_dis = find_program(llvm_bindir / 'llvm-dis')
 llvm_opt = find_program(llvm_bindir / 'opt')
 clang = find_program(llvm_bindir / 'clang')
@@ -103,17 +104,17 @@ if not get_option('enable_arm').disabled()
   endif
 
   # c++ library
-  gcc_cxx_include = arm_libgcc_dir / 'include' / f'g++-v@gcc_arm_major_version@'
-  test = fs.exists(gcc_cxx_include)
-  arm_toolchain = arm_toolchain and test
-  if not test
-    errors += f'gcc_cxx_include (@gcc_cxx_include@) is not a valid directory.'
-  endif
-  test = fs.exists(gcc_cxx_include / 'iostream')
-  arm_toolchain = arm_toolchain and test
-  if not test
-    errors += f'gcc_cxx_include (@gcc_cxx_include@) does not contain iostream.'
-  endif
+  #gcc_cxx_include = arm_libgcc_dir / 'include' / f'g++-v@gcc_arm_major_version@'
+  #test = fs.exists(gcc_cxx_include)
+  #arm_toolchain = arm_toolchain and test
+  #if not test
+  #  errors += f'gcc_cxx_include (@gcc_cxx_include@) is not a valid directory.'
+  #endif
+  #test = fs.exists(gcc_cxx_include / 'iostream')
+  #arm_toolchain = arm_toolchain and test
+  #if not test
+  #  errors += f'gcc_cxx_include (@gcc_cxx_include@) does not contain iostream.'
+  #endif
 
 
   # llvm handling
