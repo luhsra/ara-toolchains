@@ -22,6 +22,14 @@ clangpp = find_program(llvm_bindir / 'clang++')
 
 llvm_targets = files('llvm_targets.py')
 
+## ara-link
+ara_link = find_program('ara-link', version: llvm_dep.version(), required: false)
+if not ara_link.found()
+    ara_link_proj = subproject('ara-link')
+    ara_link = ara_link_proj.get_variable('ara_link')
+    message('Using ara-link from subproject.')
+endif
+
 # POSIX x86-64 toolchain
 posix_enabled = false
 if not get_option('enable_posix').disabled()
