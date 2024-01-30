@@ -29,6 +29,7 @@ if not ara_link.found()
     ara_link = ara_link_proj.get_variable('ara_link')
     message('Using ara-link from subproject.')
 endif
+llvm_link_cmd = [ara_link, '-S', '-o', '@OUTPUT@', '@INPUT@',]
 
 # POSIX x86-64 toolchain
 posix_enabled = false
