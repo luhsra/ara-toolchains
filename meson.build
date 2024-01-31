@@ -135,7 +135,6 @@ if not get_option('enable_arm').disabled()
     py3_inst, llvm_targets,
     '--llc', llc.full_path(),
     '--targets', wanted_llvm_targets, check: true)
-  message(r.returncode())
   test = r.returncode() == 0
   arm_toolchain = arm_toolchain and test
   if not test
