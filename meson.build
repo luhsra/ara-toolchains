@@ -77,9 +77,12 @@ if not get_option('enable_arm').disabled()
 
 
   # gcc tools and libs
-  tools = ['gcc', 'ar', 'ranlib', 'c++', 'size', 'objcopy', 'nm']
-  foreach tool : tools
-    set_variable('arm_' + tool.underscorify(), find_program(arm_triple + '-' + tool))
+  arm_tools = ['gcc', 'ar', 'ranlib', 'c++', 'size', 'objcopy', 'nm']
+  arm_tools_summary = []
+  foreach tool : arm_tools
+    arm_tool = find_program(arm_triple + '-' + tool)
+    set_variable('arm_' + tool.underscorify(), arm_tool)
+    arm_tools_summary += [{'key': tool, 'value': arm_tool}]
   endforeach
 
   gcc_version = files('gcc_version.py') # drop, when https://github.com/mesonbuild/meson/issues/7166 is resolved
@@ -157,11 +160,33 @@ if not get_option('enable_arm').disabled()
 endif
 
 summary({
+  'POSIX is enabled': posix_enabled,
   'ARM is enabled': arm_enabled,
+}, bool_yn: true, section: 'Architectures')
+
+summary({
+  'ar': posix_ar,
+}, bool_yn: true, section: 'POSIX')
+
+summary({
   'ARM GCC': arm_gcc,
   'ARM GCC libraries': arm_libgcc_dir,
+  'ARM C++ libraries': arm_cxx_dir,
   'ARM include directory': arm_include_path,
   'ARM linkage directory': arm_link_path,
-  'LLVM supports @0@'.format(', '.join(wanted_llvm_targets)): true,
-  'POSIX is enabled': posix_enabled,
-})
+  'LLVM supports @0@'.format(', '.join(arm_llvm)): true,
+}, bool_yn: true, section: 'ARM')
+foreach arm_tool : arm_tools_summary
+  summary(arm_tool['key'], arm_tool['value'], bool_yn: true, section: 'ARM')
+endforeach
+
+summary({
+  'llc': llc,
+  'llvm-objcopy': llvm_objcopy,
+  'lld': llvm_ld,
+  'llvm-ar': llvm_ar,
+  'llvm-dis': llvm_dis,
+  'opt': llvm_opt,
+  'clang': clang,
+  'clang++': clangpp,
+}, bool_yn: true, section: 'LLVM')
