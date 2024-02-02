@@ -22,7 +22,9 @@ targets = set([
     x.strip().split(' ')[0]
     for x in output[output.find("Registered Targets:"):].split('\n')[1:]
 ])
-if not set(args.targets) <= targets:
+if args.targets is None:
+    print("Supported targets:", targets)
+elif not set(args.targets) <= targets:
     print(f"ERROR: Wanted LLVM targets {args.targets} are not in the list "
           f"of supported targets: {sorted(targets)}")
     sys.exit(1)
