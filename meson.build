@@ -37,6 +37,17 @@ if not get_option('enable_posix').disabled()
   # TODO, we currently hard depend on a build on POSIX
   assert(host_machine.system() == 'linux', 'Build on a non Linux system is not supported.')
   posix_ar = find_program('ar')
+
+  posix_llvm = ['x86', 'x86-64']
+  r = run_command(
+    py3_inst, llvm_targets,
+    '--llc', llc.full_path(),
+    '--targets', posix_llvm, check: true)
+  test = r.returncode() == 0
+  if not test
+    error('Clang does not support the targets @0@.'.format(', '.join(posix_llvm)))
+  endif
+
   posix_enabled = true
 endif
 
@@ -166,6 +177,7 @@ summary({
 
 summary({
   'ar': posix_ar,
+  'LLVM supports @0@'.format(', '.join(posix_llvm)): true,
 }, bool_yn: true, section: 'POSIX')
 
 summary({
