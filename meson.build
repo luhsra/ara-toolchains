@@ -45,6 +45,7 @@ arm_gcc = disabler()
 arm_libgcc_dir = disabler()
 arm_include_path = disabler()
 arm_link_path = disabler()
+arm_cxx_dir = disabler()
 arm_enabled = false
 if not get_option('enable_arm').disabled()
   arm_triple = 'arm-none-eabi'
@@ -113,19 +114,19 @@ if not get_option('enable_arm').disabled()
   endif
 
   # c++ library
-  gcc_cxx_include = get_option('arm_cxx_dir')
-  if gcc_cxx_include == 'default'
-    gcc_cxx_include = arm_libgcc_dir / 'include' / f'g++-v@gcc_arm_major_version@'
+  arm_cxx_dir= get_option('arm_cxx_dir')
+  if arm_cxx_dir == 'default'
+    arm_cxx_dir = arm_libgcc_dir / 'include' / f'g++-v@gcc_arm_major_version@'
   endif
-  test = fs.exists(gcc_cxx_include)
+  test = fs.exists(arm_cxx_dir)
   arm_toolchain = arm_toolchain and test
   if not test
-    errors += f'gcc_cxx_include (@gcc_cxx_include@) is not a valid directory.'
+    errors += f'arm_cxx_dir (@arm_cxx_dir@) is not a valid directory.'
   endif
-  test = fs.exists(gcc_cxx_include / 'iostream')
+  test = fs.exists(arm_cxx_dir / 'iostream')
   arm_toolchain = arm_toolchain and test
   if not test
-    errors += f'gcc_cxx_include (@gcc_cxx_include@) does not contain iostream.'
+    errors += f'arm_cxx_dir (@arm_cxx_dir@) does not contain iostream.'
   endif
 
 
