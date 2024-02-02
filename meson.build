@@ -131,15 +131,15 @@ if not get_option('enable_arm').disabled()
 
 
   # llvm handling
-  wanted_llvm_targets = ['arm', 'arm64']
+  arm_llvm = ['arm', 'arm64']
   r = run_command(
     py3_inst, llvm_targets,
     '--llc', llc.full_path(),
-    '--targets', wanted_llvm_targets, check: true)
+    '--targets', arm_llvm, check: true)
   test = r.returncode() == 0
   arm_toolchain = arm_toolchain and test
   if not test
-    errors += 'Clang does not support the targets @0@.'.format(', '.join(wanted_llvm_targets))
+    errors += 'Clang does not support the targets @0@.'.format(', '.join(arm_llvm))
   endif
 
   # TODO download toolchain if not found
