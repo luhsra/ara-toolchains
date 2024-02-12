@@ -180,17 +180,20 @@ summary({
   'LLVM supports @0@'.format(', '.join(posix_llvm)): true,
 }, bool_yn: true, section: 'POSIX')
 
-summary({
-  'ARM GCC': arm_gcc,
-  'ARM GCC libraries': arm_libgcc_dir,
-  'ARM C++ libraries': arm_cxx_dir,
-  'ARM include directory': arm_include_path,
-  'ARM linkage directory': arm_link_path,
-  'LLVM supports @0@'.format(', '.join(arm_llvm)): true,
-}, bool_yn: true, section: 'ARM')
-foreach arm_tool : arm_tools_summary
-  summary(arm_tool['key'], arm_tool['value'], bool_yn: true, section: 'ARM')
-endforeach
+if arm_enabled
+  summary({
+    'ARM GCC': arm_gcc,
+    'ARM GCC libraries': arm_libgcc_dir,
+    'ARM C++ libraries': arm_cxx_dir,
+    'ARM include directory': arm_include_path,
+    'ARM linkage directory': arm_link_path,
+    'LLVM supports @0@'.format(', '.join(arm_llvm)): true,
+  }, bool_yn: true, section: 'ARM')
+
+  foreach arm_tool : arm_tools_summary
+    summary(arm_tool['key'], arm_tool['value'], bool_yn: true, section: 'ARM')
+  endforeach
+endif
 
 summary({
   'llc': llc,
