@@ -38,7 +38,13 @@ posix_enabled = false
 if not get_option('enable_posix').disabled()
   # TODO, we currently hard depend on a build on POSIX
   assert(host_machine.system() == 'linux', 'Build on a non Linux system is not supported.')
-  posix_ar = find_program('ar')
+  posix_tools = ['ar', 'objcopy']
+  posix_tools_summary = []
+  foreach tool : posix_tools
+    posix_tool = find_program(tool)
+    set_variable('posix_' + tool.underscorify(), posix_tool)
+    posix_tools_summary += [{'key': tool, 'value': posix_tool}]
+  endforeach
 
   posix_llvm = ['x86', 'x86-64']
   r = run_command(
@@ -177,10 +183,14 @@ summary({
   'ARM is enabled': arm_enabled,
 }, bool_yn: true, section: 'Architectures')
 
-summary({
-  'ar': posix_ar,
-  'LLVM supports @0@'.format(', '.join(posix_llvm)): true,
-}, bool_yn: true, section: 'POSIX')
+if posix_enabled
+  summary({
+    'LLVM supports @0@'.format(', '.join(posix_llvm)): true,
+  }, bool_yn: true, section: 'POSIX')
+  foreach posix_tool : posix_tools_summary
+    summary(posix_tool['key'], posix_tool['value'], bool_yn: true, section: 'POSIX')
+  endforeach
+endif
 
 if arm_enabled
   summary({
