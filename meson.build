@@ -24,6 +24,33 @@ clangpp = find_program(llvm_bindir / 'clang++')
 
 llvm_targets = files('llvm_targets.py')
 
+## meaningful compile commands
+clang_flags = [
+  '-g',  # generate debug information
+  '-O0', # no optimization
+  '-Xclang', '-disable-O0-optnone',  # don't set the noopt attribute (prevent optimization needed by ARA)
+  '-fno-rtti',  # generate no RTTI
+  '-Wno-everything',
+  '-fno-discard-value-names',  # use the C/C++ variable names for the pendent in the LLVM IR when possible
+  '-fno-exceptions',  # no exception handling within the IR
+]
+# compiler flags to generate IR
+ir_flags = ['-S', '-emit-llvm',]
+c_std = '-std=c11'
+cxx_std = '-std=c++11'
+clang_base = [
+  '-o', '@OUTPUT0@',
+  '@INPUT@',
+  '-MD', '-MF', '@DEPFILE@',
+]
+# compile with clang (without special flags)
+clang_c_cmd = [clang, clang_base, c_std]
+clang_cpp_cmd = [clang, clang_base, cxx_std]
+# standard commands to compile from C/C++ to IR
+clang_c_to_ir_cmd = clang_c_cmd + clang_flags + ir_flags
+clang_cpp_to_ir_cmd = clang_cpp_cmd + clang_flags + ir_flags
+
+
 ## ara-link
 ara_link = find_program('ara-link', version: llvm_dep.version(), required: false)
 if not ara_link.found()
