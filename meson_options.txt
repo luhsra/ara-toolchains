@@ -5,7 +5,7 @@ option('enable_posix', type: 'feature', value: 'auto', yield: true,
 # arm
 option('enable_arm', type: 'feature', value: 'auto', yield: true,
   description: 'Require a toolchain for the ARM architecture.')
-option('arm_libs', type: 'string', value: '/usr/lib/arm-none-eabi', yield: true,
+option('arm_libs', type: 'string', value: 'default', yield: true,
   description: 'Path to the ARM libraries')
 option('arm_include_dir', type: 'string', value: '@0@/include', yield: true,
     description: 'A list of include dirs for compiling for ARM. @0@ is replaced by the value of arm_libs.')
@@ -16,7 +16,7 @@ option('arm_gcc_dir', type: 'string', value: '/usr/lib/gcc/arm-none-eabi/@0@/', 
 option('arm_gcc_version', type: 'string', value: 'default', yield: true,
     description: 'The version of the GCC cross compiler for ARM. The special value of "default" assumes the same version like the system GCC.')
 option('arm_cxx_dir', type: 'string', value: 'default', yield: true,
-    description: 'The path to the STL C++ libs for ARM. The special value of "default" assumes a directory within arm_gcc_dir.')
+    description: 'The path to the STL C++ libs for ARM. The special value of "default" tries searching in arm_libs')
 
 # riscv
 option('enable_riscv', type: 'feature', value: 'auto', yield: true,

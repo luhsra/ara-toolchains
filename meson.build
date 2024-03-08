@@ -98,8 +98,34 @@ if not get_option('enable_arm').disabled()
   arm_toolchain = true
   errors = []
 
+  # find arm libs
+  arm_libs = get_option('arm_libs')
+  if arm_libs == 'default'
+    locs = [
+      '/usr/lib/arm-none-eabi', # Debian, Gentoo
+      '/usr/arm-none-eabi', # Arch
+    ]
+    foreach loc : locs
+      if fs.exists(loc)
+        arm_libs = loc
+        break
+      endif
+    endforeach
+    if arm_libs == 'default'
+      errors += f'arm_libs not found'
+      arm_toolchain = false
+    endif
+
+  else # manually set
+    test = fs.exists(arm_libs)
+    arm_toolchain = arm_toolchain and test
+    if not test
+      errors += f'arm_libs (@arm_libs@) is not a valid directory.'
+    endif
+  endif
+
   # include paths
-  arm_include_path = get_option('arm_include_dir').format(get_option('arm_libs'))
+  arm_include_path = get_option('arm_include_dir').format(arm_libs)
   # tests
   test = fs.exists(arm_include_path)
   arm_toolchain = arm_toolchain and test
@@ -108,7 +134,7 @@ if not get_option('enable_arm').disabled()
   endif
 
   # lib path
-  arm_link_path = get_option('arm_link_dir').format(get_option('arm_libs'))
+  arm_link_path = get_option('arm_link_dir').format(arm_libs)
   # tests
   test = fs.exists(arm_link_path)
   arm_toolchain = arm_toolchain and test
@@ -162,20 +188,36 @@ if not get_option('enable_arm').disabled()
     errors += f'arm_libgcc_dir (@arm_libgcc_dir@) does not contain libgcc.a.'
   endif
 
-  # c++ library
+  # find c++ library
   arm_cxx_dir= get_option('arm_cxx_dir')
   if arm_cxx_dir == 'default'
-    arm_cxx_dir = arm_libgcc_dir / 'include' / f'g++-v@gcc_arm_major_version@'
-  endif
-  test = fs.exists(arm_cxx_dir)
-  arm_toolchain = arm_toolchain and test
-  if not test
-    errors += f'arm_cxx_dir (@arm_cxx_dir@) is not a valid directory.'
-  endif
-  test = fs.exists(arm_cxx_dir / 'iostream')
-  arm_toolchain = arm_toolchain and test
-  if not test
-    errors += f'arm_cxx_dir (@arm_cxx_dir@) does not contain iostream.'
+    locs = [
+      '/usr/include/newlib/c++' / f'@gcc_arm_version@', # Debian
+      arm_libgcc_dir / 'include' / f'g++-v@gcc_arm_major_version@', # Gentoo
+      arm_include_path / 'c++' / f'@gcc_arm_version@', # Arch
+    ]
+    foreach loc : locs
+      if fs.exists(loc)
+        arm_cxx_dir = loc
+        break
+      endif
+    endforeach
+    if arm_cxx_dir == 'default'
+      errors += f'arm_cxx_dir not found'
+      arm_toolchain = false
+    endif
+
+  else # manually set
+    test = fs.exists(arm_cxx_dir)
+    arm_toolchain = arm_toolchain and test
+    if not test
+      errors += f'arm_cxx_dir (@arm_cxx_dir@) is not a valid directory.'
+    endif
+    test = fs.exists(arm_cxx_dir / 'iostream')
+    arm_toolchain = arm_toolchain and test
+    if not test
+      errors += f'arm_cxx_dir (@arm_cxx_dir@) does not contain iostream.'
+    endif
   endif
 
 
