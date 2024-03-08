@@ -206,112 +206,112 @@ if not get_option('enable_arm').disabled()
 endif
 
 # RISC-V 32bit toolchain
-riscv32_gcc = disabler()
-riscv32_libgcc_dir = disabler()
-riscv32_include_path = disabler()
-riscv32_link_path = disabler()
-riscv32_cxx_dir = disabler()
-riscv32_enabled = false
+riscv_gcc = disabler()
+riscv_libgcc_dir = disabler()
+riscv_include_path = disabler()
+riscv_link_path = disabler()
+riscv_cxx_dir = disabler()
+riscv_enabled = false
 if not get_option('enable_arm').disabled()
-  riscv32_triple = 'riscv32-none-elf'
-  riscv32_toolchain = true
+  riscv_triple = 'riscv-none-elf'
+  riscv_toolchain = true
   errors = []
 
-# # include paths
-# riscv32_include_path = get_option('riscv32_include_dir').format(get_option('riscv32_libs'))
-# # tests
-# test = fs.exists(riscv32_include_path)
-# riscv32_toolchain = riscv32_toolchain and test
-# if not test
-#   errors += f'riscv32_include_dir (@riscv32_include_path@) is not a valid directory.'
-# endif
-# # lib path
-# riscv32_link_path = get_option('riscv32_link_dir').format(get_option('riscv32_libs'))
-# # tests
-# test = fs.exists(riscv32_link_path)
-# riscv32_toolchain = riscv32_toolchain and test
-# if not test
-#   errors += f'riscv32_lib_dir (@riscv32_link_path@) is not a valid directory.'
-# endif
-# test = fs.exists(riscv32_link_path / 'libc.a')
-# riscv32_toolchain = riscv32_toolchain and test
-# if not test
-#   errors += f'riscv32_lib_dir (@riscv32_link_path@) does not contain a libc.a.'
-# endif
-# # gcc tools and libs
-# riscv32_tools = ['gcc', 'ar', 'ranlib', 'c++', 'size', 'objcopy', 'nm']
-# riscv32_tools_summary = []
-# foreach tool : riscv32_tools
-#   riscv32_tool = find_program(riscv32_triple + '-' + tool)
-#   set_variable('riscv32_' + tool.underscorify(), riscv32_tool)
-#   riscv32_tools_summary += [{'key': tool, 'value': riscv32_tool}]
-# endforeach
-# gcc_version = files('gcc_version.py') # drop, when https://github.com/mesonbuild/meson/issues/7166 is resolved
-# if get_option('riscv32_gcc_version') == 'default'
-#   r = run_command(py3_inst, gcc_version, riscv32_gcc.path(), check: true)
-#   if r.returncode() != 0
-#     error('Cannot extract default GCC option. Consider setting "riscv32_gcc_version".')
-#   endif
-#   gcc_riscv32_version = r.stdout().strip()
-#   gcc_riscv32_major_version = gcc_riscv32_version.split('.')[0]
-# else
-#   gcc_riscv32_version = get_option('riscv32_gcc_version')
-# endif
-# riscv32_libgcc_dir = get_option('riscv32_gcc_dir').format(gcc_riscv32_version)
-# gcc_dir_error = ''
-# if not fs.exists(riscv32_libgcc_dir)
-#   gcc_dir_error = f'\nriscv32_libgcc_dir (@riscv32_libgcc_dir@) is not a valid directory.'
-#   riscv32_libgcc_dir = get_option('riscv32_gcc_dir').format(gcc_riscv32_major_version)
-# endif
-# # tests
-# test = fs.exists(riscv32_libgcc_dir)
-# riscv32_toolchain = riscv32_toolchain and test
-# if not test
-#   errors += f'riscv32_libgcc_dir (@riscv32_libgcc_dir@) is not a valid directory.' + gcc_dir_error
-# endif
-# test = fs.exists(riscv32_libgcc_dir / 'libgcc.a')
-# riscv32_toolchain = riscv32_toolchain and test
-# if not test
-#   errors += f'riscv32_libgcc_dir (@riscv32_libgcc_dir@) does not contain libgcc.a.'
-# endif
-# # c++ library
-# riscv32_cxx_dir= get_option('riscv32_cxx_dir')
-# if riscv32_cxx_dir == 'default'
-#   riscv32_cxx_dir = riscv32_libgcc_dir / 'include' / f'g++-v@gcc_riscv32_major_version@'
-# endif
-# test = fs.exists(riscv32_cxx_dir)
-# riscv32_toolchain = riscv32_toolchain and test
-# if not test
-#   errors += f'riscv32_cxx_dir (@riscv32_cxx_dir@) is not a valid directory.'
-# endif
-# test = fs.exists(riscv32_cxx_dir / 'iostream')
-# riscv32_toolchain = riscv32_toolchain and test
-# if not test
-#   errors += f'riscv32_cxx_dir (@riscv32_cxx_dir@) does not contain iostream.'
-# endif
+  # include paths
+  riscv_include_path = get_option('riscv_include_dir').format(get_option('riscv_libs'))
+  # tests
+  test = fs.exists(riscv_include_path)
+  riscv_toolchain = riscv_toolchain and test
+  if not test
+    errors += f'riscv_include_dir (@riscv_include_path@) is not a valid directory.'
+  endif
+  # lib path
+  riscv_link_path = get_option('riscv_link_dir').format(get_option('riscv_libs'))
+  # tests
+  test = fs.exists(riscv_link_path)
+  riscv_toolchain = riscv_toolchain and test
+  if not test
+    errors += f'riscv_lib_dir (@riscv_link_path@) is not a valid directory.'
+  endif
+  test = fs.exists(riscv_link_path / 'libc.a')
+  riscv_toolchain = riscv_toolchain and test
+  if not test
+    errors += f'riscv_lib_dir (@riscv_link_path@) does not contain a libc.a.'
+  endif
+  # gcc tools and libs
+  riscv_tools = ['gcc', 'ar', 'ranlib', 'c++', 'size', 'objcopy', 'nm']
+  riscv_tools_summary = []
+  foreach tool : riscv_tools
+    riscv_tool = find_program(riscv_triple + '-' + tool)
+    set_variable('riscv_' + tool.underscorify(), riscv_tool)
+    riscv_tools_summary += [{'key': tool, 'value': riscv_tool}]
+  endforeach
+  gcc_version = files('gcc_version.py') # drop, when https://github.com/mesonbuild/meson/issues/7166 is resolved
+  if get_option('riscv_gcc_version') == 'default'
+    r = run_command(py3_inst, gcc_version, riscv_gcc.path(), check: true)
+    if r.returncode() != 0
+      error('Cannot extract default GCC option. Consider setting "riscv_gcc_version".')
+    endif
+    gcc_riscv_version = r.stdout().strip()
+    gcc_riscv_major_version = gcc_riscv_version.split('.')[0]
+  else
+    gcc_riscv_version = get_option('riscv_gcc_version')
+  endif
+  riscv_libgcc_dir = get_option('riscv_gcc_dir').format(gcc_riscv_version)
+  gcc_dir_error = ''
+  if not fs.exists(riscv_libgcc_dir)
+    gcc_dir_error = f'\nriscv_libgcc_dir (@riscv_libgcc_dir@) is not a valid directory.'
+    riscv_libgcc_dir = get_option('riscv_gcc_dir').format(gcc_riscv_major_version)
+  endif
+  # tests
+  test = fs.exists(riscv_libgcc_dir)
+  riscv_toolchain = riscv_toolchain and test
+  if not test
+    errors += f'riscv_libgcc_dir (@riscv_libgcc_dir@) is not a valid directory.' + gcc_dir_error
+  endif
+  test = fs.exists(riscv_libgcc_dir / 'libgcc.a')
+  riscv_toolchain = riscv_toolchain and test
+  if not test
+    errors += f'riscv_libgcc_dir (@riscv_libgcc_dir@) does not contain libgcc.a.'
+  endif
+  # c++ library
+  riscv_cxx_dir= get_option('riscv_cxx_dir')
+  if riscv_cxx_dir == 'default'
+    riscv_cxx_dir = riscv_libgcc_dir / 'include' / f'g++-v@gcc_riscv_major_version@'
+  endif
+  test = fs.exists(riscv_cxx_dir)
+  riscv_toolchain = riscv_toolchain and test
+  if not test
+    errors += f'riscv_cxx_dir (@riscv_cxx_dir@) is not a valid directory.'
+  endif
+  test = fs.exists(riscv_cxx_dir / 'iostream')
+  riscv_toolchain = riscv_toolchain and test
+  if not test
+    errors += f'riscv_cxx_dir (@riscv_cxx_dir@) does not contain iostream.'
+  endif
 
   # llvm handling
-  riscv32_llvm = ['riscv32']
+  riscv_llvm = ['riscv32']
   r = run_command(
     py3_inst, llvm_targets,
     '--llc', llc.full_path(),
-    '--targets', riscv32_llvm, check: true)
+    '--targets', riscv_llvm, check: true)
   test = r.returncode() == 0
-  riscv32_toolchain = riscv32_toolchain and test
+  riscv_toolchain = riscv_toolchain and test
   if not test
-    errors += 'Clang does not support the targets @0@.'.format(', '.join(riscv32_llvm))
+    errors += 'Clang does not support the targets @0@.'.format(', '.join(riscv_llvm))
   endif
 
   # TODO download toolchain if not found
-  # see riscv32_toolchain.sh
-  riscv32_enabled = true
-  error_string = 'riscv32 toolchain not found. The following errors occured:\n@0@'.format('\n'.join(errors))
-  if not riscv32_toolchain
-    if get_option('enable_riscv32').enabled()
+  # see riscv_toolchain.sh
+  riscv_enabled = true
+  error_string = 'riscv toolchain not found. The following errors occured:\n@0@'.format('\n'.join(errors))
+  if not riscv_toolchain
+    if get_option('enable_riscv').enabled()
       error(error_string)
     else
       message(error_string)
-      riscv32_enabled = false
+      riscv_enabled = false
     endif
   endif
 endif
@@ -319,7 +319,7 @@ endif
 summary({
   'POSIX is enabled': posix_enabled,
   'ARM is enabled': arm_enabled,
-  'RISC-V 32 is enabled': riscv32_enabled,
+  'RISC-V is enabled': riscv_enabled,
 }, bool_yn: true, section: 'Architectures')
 
 if posix_enabled
@@ -346,19 +346,19 @@ if arm_enabled
   endforeach
 endif
 
-if riscv32_enabled
+if riscv_enabled
   summary({
-    'RISC-V 32 GCC': riscv32_gcc,
-    'RISC-V 32 GCC libraries': riscv32_libgcc_dir,
-    'RISC-V 32 C++ libraries': riscv32_cxx_dir,
-    'RISC-V 32 include directory': riscv32_include_path,
-    'RISC-V 32 linkage directory': riscv32_link_path,
-    'LLVM supports @0@'.format(', '.join(riscv32_llvm)): true,
-  }, bool_yn: true, section: 'RISC-V 32')
+    'RISC-V GCC': riscv_gcc,
+    'RISC-V GCC libraries': riscv_libgcc_dir,
+    'RISC-V C++ libraries': riscv_cxx_dir,
+    'RISC-V include directory': riscv_include_path,
+    'RISC-V linkage directory': riscv_link_path,
+    'LLVM supports @0@'.format(', '.join(riscv_llvm)): true,
+  }, bool_yn: true, section: 'RISC-V')
 
-  # foreach riscv32_tool : riscv32_tools_summary
-  #   summary(riscv32_tool['key'], riscv32_tool['value'], bool_yn: true, section: 'RISC-V 32')
-  # endforeach
+  foreach riscv_tool : riscv_tools_summary
+    summary(riscv_tool['key'], riscv_tool['value'], bool_yn: true, section: 'RISC-V')
+  endforeach
 endif
 
 summary({

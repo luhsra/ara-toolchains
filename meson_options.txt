@@ -18,18 +18,18 @@ option('arm_gcc_version', type: 'string', value: 'default', yield: true,
 option('arm_cxx_dir', type: 'string', value: 'default', yield: true,
     description: 'The path to the STL C++ libs for ARM. The special value of "default" assumes a directory within arm_gcc_dir.')
 
-# riscv32
-option('enable_riscv32', type: 'feature', value: 'auto', yield: true,
+# riscv
+option('enable_riscv', type: 'feature', value: 'auto', yield: true,
   description: 'Require a toolchain for the RISC-V 32 architecture.')
-option('riscv32_libs', type: 'string', value: '/usr/lib/riscv32-none-eabi', yield: true,
+option('riscv_libs', type: 'string', value: '/usr/lib/riscv-none-eabi', yield: true,
   description: 'Path to the RISC-V 32 libraries')
-option('riscv32_include_dir', type: 'string', value: '@0@/usr/include', yield: true,
-    description: 'A list of include dirs for compiling for RISC-V 32. @0@ is replaced by the value of riscv32_libs.')
-option('riscv32_link_dir', type: 'string', value: '@0@/lib', yield: true,
-    description: 'A list of link dirs for compiling for RISC-V 32. @0@ is replaced by the value of riscv32_libs')
-option('riscv32_gcc_dir', type: 'string', value: '/usr/lib/gcc/riscv32-unknown-linux-gnu/@0@/', yield: true,
-    description: 'The path to the GCC RISC-V 32 toolchain. Note that @0@ is replaced with the riscv32_gcc_version. Only relevant, if arch==riscv32. (Sometimes need to remove trailing nofp/)')
-option('riscv32_gcc_version', type: 'string', value: 'default', yield: true,
+option('riscv_include_dir', type: 'string', value: '@0@/include', yield: true,
+    description: 'A list of include dirs for compiling for RISC-V 32. @0@ is replaced by the value of riscv_libs.')
+option('riscv_link_dir', type: 'string', value: '@0@/lib', yield: true,
+    description: 'A list of link dirs for compiling for RISC-V 32. @0@ is replaced by the value of riscv_libs')
+option('riscv_gcc_dir', type: 'string', value: '/usr/lib/gcc/riscv-none-elf/@0@/', yield: true,
+    description: 'The path to the GCC RISC-V 32 toolchain. Note that @0@ is replaced with the riscv_gcc_version. Only relevant, if arch==riscv. (Sometimes need to remove trailing nofp/)')
+option('riscv_gcc_version', type: 'string', value: 'default', yield: true,
     description: 'The version of the GCC cross compiler for RISC-V 32. The special value of "default" assumes the same version like the system GCC.')
-option('riscv32_cxx_dir', type: 'string', value: 'default', yield: true,
-    description: 'The path to the STL C++ libs for RISC-V 32. The special value of "default" assumes a directory within riscv32_gcc_dir.')
+option('riscv_cxx_dir', type: 'string', value: 'default', yield: true,
+    description: 'The path to the STL C++ libs for RISC-V 32. The special value of "default" assumes a directory within riscv_gcc_dir.')
