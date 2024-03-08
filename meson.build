@@ -254,7 +254,7 @@ riscv_include_path = disabler()
 riscv_link_path = disabler()
 riscv_cxx_dir = disabler()
 riscv_enabled = false
-if not get_option('enable_arm').disabled()
+if not get_option('enable_riscv').disabled()
   riscv_triple = 'riscv-none-elf'
   riscv_toolchain = true
   errors = []
