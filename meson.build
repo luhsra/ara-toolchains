@@ -152,7 +152,7 @@ if not get_option('enable_arm').disabled()
   arm_tools = ['gcc', 'ar', 'ranlib', 'c++', 'size', 'objcopy', 'nm']
   arm_tools_summary = []
   foreach tool : arm_tools
-    arm_tool = find_program(arm_triple + '-' + tool)
+    arm_tool = find_program(arm_triple + '-' + tool, disabler: true, required:get_option('enable_arm'))
     set_variable('arm_' + tool.underscorify(), arm_tool)
     arm_tools_summary += [{'key': tool, 'value': arm_tool}]
   endforeach
@@ -284,7 +284,7 @@ if not get_option('enable_riscv').disabled()
   riscv_tools = ['gcc', 'ar', 'ranlib', 'c++', 'size', 'objcopy', 'nm']
   riscv_tools_summary = []
   foreach tool : riscv_tools
-    riscv_tool = find_program(riscv_triple + '-' + tool)
+    riscv_tool = find_program(riscv_triple + '-' + tool, disabler: true, required:get_option('enable_riscv'))
     set_variable('riscv_' + tool.underscorify(), riscv_tool)
     riscv_tools_summary += [{'key': tool, 'value': riscv_tool}]
   endforeach
