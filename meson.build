@@ -86,6 +86,9 @@ if not get_option('enable_posix').disabled()
   posix_enabled = true
 endif
 
+
+gcc_version = files('gcc_version.py') # drop, when https://github.com/mesonbuild/meson/issues/7166 is resolved
+
 # ARM toolchain
 arm_gcc = disabler()
 arm_libgcc_dir = disabler()
@@ -94,59 +97,9 @@ arm_link_path = disabler()
 arm_cxx_dir = disabler()
 arm_enabled = false
 if not get_option('enable_arm').disabled()
-  arm_triple = 'arm-none-eabi'
-  arm_toolchain = true
+  arm_triple = meson.get_external_property('arm_triple', 'arm-none-eabi')
+  arm_enabled = true
   errors = []
-
-  # find arm libs
-  arm_libs = get_option('arm_libs')
-  if arm_libs == 'default'
-    locs = [
-      '/usr/lib/arm-none-eabi', # Debian, Gentoo
-      '/usr/arm-none-eabi', # Arch
-    ]
-    foreach loc : locs
-      if fs.exists(loc)
-        arm_libs = loc
-        break
-      endif
-    endforeach
-    if arm_libs == 'default'
-      errors += f'arm_libs not found'
-      arm_toolchain = false
-    endif
-
-  else # manually set
-    test = fs.exists(arm_libs)
-    arm_toolchain = arm_toolchain and test
-    if not test
-      errors += f'arm_libs (@arm_libs@) is not a valid directory.'
-    endif
-  endif
-
-  # include paths
-  arm_include_path = get_option('arm_include_dir').format(arm_libs)
-  # tests
-  test = fs.exists(arm_include_path)
-  arm_toolchain = arm_toolchain and test
-  if not test
-    errors += f'arm_include_dir (@arm_include_path@) is not a valid directory.'
-  endif
-
-  # lib path
-  arm_link_path = get_option('arm_link_dir').format(arm_libs)
-  # tests
-  test = fs.exists(arm_link_path)
-  arm_toolchain = arm_toolchain and test
-  if not test
-    errors += f'arm_lib_dir (@arm_link_path@) is not a valid directory.'
-  endif
-  test = fs.exists(arm_link_path / 'libc.a')
-  arm_toolchain = arm_toolchain and test
-  if not test
-    errors += f'arm_lib_dir (@arm_link_path@) does not contain a libc.a.'
-  endif
-
 
   # gcc tools and libs
   arm_tools = ['gcc', 'ar', 'ranlib', 'c++', 'size', 'objcopy', 'nm']
@@ -157,87 +110,60 @@ if not get_option('enable_arm').disabled()
     arm_tools_summary += [{'key': tool, 'value': arm_tool}]
   endforeach
 
-  gcc_version = files('gcc_version.py') # drop, when https://github.com/mesonbuild/meson/issues/7166 is resolved
-  if get_option('arm_gcc_version') == 'default'
-    r = run_command(py3_inst, gcc_version, arm_gcc.path(), check: true)
-    if r.returncode() != 0
-      error('Cannot extract default GCC option. Consider setting "arm_gcc_version".')
-    endif
-    gcc_arm_version = r.stdout().strip()
-    gcc_arm_major_version = gcc_arm_version.split('.')[0]
-  else
-    gcc_arm_version = get_option('arm_gcc_version')
+  r = run_command(py3_inst, gcc_version, arm_gcc.path(), check: true)
+  if r.returncode() != 0
+    error('Cannot execute arm_gcc')
   endif
-  arm_libgcc_dir = get_option('arm_gcc_dir').format(gcc_arm_version)
-  gcc_dir_error = ''
-  if not fs.exists(arm_libgcc_dir)
-    gcc_dir_error = f'\narm_libgcc_dir (@arm_libgcc_dir@) is not a valid directory.'
-    arm_libgcc_dir = get_option('arm_gcc_dir').format(gcc_arm_major_version)
-  endif
+  gcc_arm_version = r.stdout().strip()
+  gcc_arm_major_version = gcc_arm_version.split('.')[0]
+
+  # get properties
+  arm_libgcc_dir = meson.get_external_property('arm_gcc_dir', '/usr/lib/gcc' / arm_triple / '@gcc_arm_version@').format()
+  arm_include_path = meson.get_external_property('arm_include_path', '/usr/lib' / arm_triple / 'include').format()
+  arm_link_path = meson.get_external_property('arm_link_path', '/usr/lib' / arm_triple / 'lib').format()
+  arm_cxx_dir = meson.get_external_property('arm_cxx_dir', '/usr/include/newlib/c++/@gcc_arm_version@').format()
+
+  # https://github.com/mesonbuild/meson/issues/13126
+  arm_libgcc_dir   = arm_libgcc_dir.replace('@gcc_arm_version@', gcc_arm_version)
+  arm_libgcc_dir   = arm_libgcc_dir.replace('@gcc_arm_major_version@', gcc_arm_major_version)
+  arm_include_path = arm_include_path.replace('@gcc_arm_version@', gcc_arm_version)
+  arm_include_path = arm_include_path.replace('@gcc_arm_major_version@', gcc_arm_major_version)
+  arm_link_path    = arm_link_path.replace('@gcc_arm_version@', gcc_arm_version)
+  arm_link_path    = arm_link_path.replace('@gcc_arm_major_version@', gcc_arm_major_version)
+  arm_cxx_dir      = arm_cxx_dir.replace('@gcc_arm_version@', gcc_arm_version)
+  arm_cxx_dir      = arm_cxx_dir.replace('@gcc_arm_major_version@', gcc_arm_major_version)
 
   # tests
-  test = fs.exists(arm_libgcc_dir)
-  arm_toolchain = arm_toolchain and test
-  if not test
-    errors += f'arm_libgcc_dir (@arm_libgcc_dir@) is not a valid directory.' + gcc_dir_error
+  if not fs.exists(arm_include_path)
+    errors += f'arm_include_path (@arm_include_path@) is not a valid directory.'
   endif
-
-  test = fs.exists(arm_libgcc_dir / 'libgcc.a')
-  arm_toolchain = arm_toolchain and test
-  if not test
+  if not fs.exists(arm_link_path)
+    errors += f'arm_link_path (@arm_link_path@) is not a valid directory.'
+  endif
+  if not fs.exists(arm_libgcc_dir)
+    errors += f'arm_libgcc_dir (@arm_libgcc_dir@) is not a valid directory.'
+  endif 
+  if not fs.exists(arm_cxx_dir)
+    errors += f'arm_cxx_dir (@arm_cxx_dir@) is not a valid directory.'
+  endif
+  if not fs.exists(arm_libgcc_dir / 'libgcc.a')
     errors += f'arm_libgcc_dir (@arm_libgcc_dir@) does not contain libgcc.a.'
   endif
-
-  # find c++ library
-  arm_cxx_dir= get_option('arm_cxx_dir')
-  if arm_cxx_dir == 'default'
-    locs = [
-      '/usr/include/newlib/c++' / f'@gcc_arm_version@', # Debian
-      arm_libgcc_dir / 'include' / f'g++-v@gcc_arm_major_version@', # Gentoo
-      arm_include_path / 'c++' / f'@gcc_arm_version@', # Arch
-    ]
-    foreach loc : locs
-      if fs.exists(loc)
-        arm_cxx_dir = loc
-        break
-      endif
-    endforeach
-    if arm_cxx_dir == 'default'
-      errors += f'arm_cxx_dir not found'
-      arm_toolchain = false
-    endif
-
-  else # manually set
-    test = fs.exists(arm_cxx_dir)
-    arm_toolchain = arm_toolchain and test
-    if not test
-      errors += f'arm_cxx_dir (@arm_cxx_dir@) is not a valid directory.'
-    endif
-    test = fs.exists(arm_cxx_dir / 'iostream')
-    arm_toolchain = arm_toolchain and test
-    if not test
-      errors += f'arm_cxx_dir (@arm_cxx_dir@) does not contain iostream.'
-    endif
-  endif
-
-
+  
   # llvm handling
   arm_llvm = ['arm', 'arm64']
   r = run_command(
     py3_inst, llvm_targets,
     '--llc', llc.full_path(),
     '--targets', arm_llvm, check: true)
-  test = r.returncode() == 0
-  arm_toolchain = arm_toolchain and test
-  if not test
+  if r.returncode() != 0
     errors += 'Clang does not support the targets @0@.'.format(', '.join(arm_llvm))
   endif
 
   # TODO download toolchain if not found
   # see arm_toolchain.sh
-  arm_enabled = true
   error_string = 'ARM toolchain not found. The following errors occured:\n@0@'.format('\n'.join(errors))
-  if not arm_toolchain
+  if errors.length() > 0
     if get_option('enable_arm').enabled()
       error(error_string)
     else
@@ -247,7 +173,7 @@ if not get_option('enable_arm').disabled()
   endif
 endif
 
-# RISC-V 32bit toolchain
+# RISC-V toolchain
 riscv_gcc = disabler()
 riscv_libgcc_dir = disabler()
 riscv_include_path = disabler()
@@ -255,31 +181,10 @@ riscv_link_path = disabler()
 riscv_cxx_dir = disabler()
 riscv_enabled = false
 if not get_option('enable_riscv').disabled()
-  riscv_triple = 'riscv-none-elf'
-  riscv_toolchain = true
+  riscv_triple = meson.get_external_property('riscv_triple', 'riscv64-unknown-elf')
+  riscv_enabled = true
   errors = []
 
-  # include paths
-  riscv_include_path = get_option('riscv_include_dir').format(get_option('riscv_libs'))
-  # tests
-  test = fs.exists(riscv_include_path)
-  riscv_toolchain = riscv_toolchain and test
-  if not test
-    errors += f'riscv_include_dir (@riscv_include_path@) is not a valid directory.'
-  endif
-  # lib path
-  riscv_link_path = get_option('riscv_link_dir').format(get_option('riscv_libs'))
-  # tests
-  test = fs.exists(riscv_link_path)
-  riscv_toolchain = riscv_toolchain and test
-  if not test
-    errors += f'riscv_lib_dir (@riscv_link_path@) is not a valid directory.'
-  endif
-  test = fs.exists(riscv_link_path / 'libc.a')
-  riscv_toolchain = riscv_toolchain and test
-  if not test
-    errors += f'riscv_lib_dir (@riscv_link_path@) does not contain a libc.a.'
-  endif
   # gcc tools and libs
   riscv_tools = ['gcc', 'ar', 'ranlib', 'c++', 'size', 'objcopy', 'nm']
   riscv_tools_summary = []
@@ -288,67 +193,61 @@ if not get_option('enable_riscv').disabled()
     set_variable('riscv_' + tool.underscorify(), riscv_tool)
     riscv_tools_summary += [{'key': tool, 'value': riscv_tool}]
   endforeach
-  gcc_version = files('gcc_version.py') # drop, when https://github.com/mesonbuild/meson/issues/7166 is resolved
-  if get_option('riscv_gcc_version') == 'default'
-    r = run_command(py3_inst, gcc_version, riscv_gcc.path(), check: true)
-    if r.returncode() != 0
-      error('Cannot extract default GCC option. Consider setting "riscv_gcc_version".')
-    endif
-    gcc_riscv_version = r.stdout().strip()
-    gcc_riscv_major_version = gcc_riscv_version.split('.')[0]
-  else
-    gcc_riscv_version = get_option('riscv_gcc_version')
+
+  r = run_command(py3_inst, gcc_version, riscv_gcc.path(), check: true)
+  if r.returncode() != 0
+    error('Cannot execute riscv_gcc')
   endif
-  riscv_libgcc_dir = get_option('riscv_gcc_dir').format(gcc_riscv_version)
-  gcc_dir_error = ''
-  if not fs.exists(riscv_libgcc_dir)
-    gcc_dir_error = f'\nriscv_libgcc_dir (@riscv_libgcc_dir@) is not a valid directory.'
-    riscv_libgcc_dir = get_option('riscv_gcc_dir').format(gcc_riscv_major_version)
-  endif
+  gcc_riscv_version = r.stdout().strip()
+  gcc_riscv_major_version = gcc_riscv_version.split('.')[0]
+
+  # get properties
+  riscv_libgcc_dir = meson.get_external_property('riscv_gcc_dir', '/usr/lib/gcc' / riscv_triple / '@gcc_riscv_version@').format()
+  riscv_include_path = meson.get_external_property('riscv_include_path', '/usr/riscv64-linux-gnu/include').format()
+  riscv_link_path = meson.get_external_property('riscv_link_path', '/usr/riscv64-linux-gnu/lib').format()
+  riscv_cxx_dir = meson.get_external_property('riscv_cxx_dir', '/usr/riscv64-linux-gnu/include/c++/@gcc_riscv_major_version@').format()
+
+  # https://github.com/mesonbuild/meson/issues/13126
+  riscv_libgcc_dir   = riscv_libgcc_dir.replace('@gcc_riscv_version@', gcc_riscv_version)
+  riscv_libgcc_dir   = riscv_libgcc_dir.replace('@gcc_riscv_major_version@', gcc_riscv_major_version)
+  riscv_include_path = riscv_include_path.replace('@gcc_riscv_version@', gcc_riscv_version)
+  riscv_include_path = riscv_include_path.replace('@gcc_riscv_major_version@', gcc_riscv_major_version)
+  riscv_link_path    = riscv_link_path.replace('@gcc_riscv_version@', gcc_riscv_version)
+  riscv_link_path    = riscv_link_path.replace('@gcc_riscv_major_version@', gcc_riscv_major_version)
+  riscv_cxx_dir      = riscv_cxx_dir.replace('@gcc_riscv_version@', gcc_riscv_version)
+  riscv_cxx_dir      = riscv_cxx_dir.replace('@gcc_riscv_major_version@', gcc_riscv_major_version)
+
   # tests
-  test = fs.exists(riscv_libgcc_dir)
-  riscv_toolchain = riscv_toolchain and test
-  if not test
-    errors += f'riscv_libgcc_dir (@riscv_libgcc_dir@) is not a valid directory.' + gcc_dir_error
+  if not fs.exists(riscv_include_path)
+    errors += f'riscv_include_path (@riscv_include_path@) is not a valid directory.'
   endif
-  test = fs.exists(riscv_libgcc_dir / 'libgcc.a')
-  riscv_toolchain = riscv_toolchain and test
-  if not test
-    errors += f'riscv_libgcc_dir (@riscv_libgcc_dir@) does not contain libgcc.a.'
+  if not fs.exists(riscv_link_path)
+    errors += f'riscv_link_path (@riscv_link_path@) is not a valid directory.'
   endif
-  # c++ library
-  riscv_cxx_dir= get_option('riscv_cxx_dir')
-  if riscv_cxx_dir == 'default'
-    riscv_cxx_dir = riscv_libgcc_dir / 'include' / f'g++-v@gcc_riscv_major_version@'
-  endif
-  test = fs.exists(riscv_cxx_dir)
-  riscv_toolchain = riscv_toolchain and test
-  if not test
+  if not fs.exists(riscv_libgcc_dir)
+    errors += f'riscv_libgcc_dir (@riscv_libgcc_dir@) is not a valid directory.'
+  endif 
+  if not fs.exists(riscv_cxx_dir)
     errors += f'riscv_cxx_dir (@riscv_cxx_dir@) is not a valid directory.'
   endif
-  test = fs.exists(riscv_cxx_dir / 'iostream')
-  riscv_toolchain = riscv_toolchain and test
-  if not test
-    errors += f'riscv_cxx_dir (@riscv_cxx_dir@) does not contain iostream.'
+  if not fs.exists(riscv_libgcc_dir / 'libgcc.a')
+    errors += f'riscv_libgcc_dir (@riscv_libgcc_dir@) does not contain libgcc.a.'
   endif
-
+  
   # llvm handling
-  riscv_llvm = ['riscv32']
+  riscv_llvm = ['riscv32', 'riscv64']
   r = run_command(
     py3_inst, llvm_targets,
     '--llc', llc.full_path(),
     '--targets', riscv_llvm, check: true)
-  test = r.returncode() == 0
-  riscv_toolchain = riscv_toolchain and test
-  if not test
+  if r.returncode() != 0
     errors += 'Clang does not support the targets @0@.'.format(', '.join(riscv_llvm))
   endif
 
   # TODO download toolchain if not found
   # see riscv_toolchain.sh
-  riscv_enabled = true
   error_string = 'riscv toolchain not found. The following errors occured:\n@0@'.format('\n'.join(errors))
-  if not riscv_toolchain
+  if errors.length() > 0
     if get_option('enable_riscv').enabled()
       error(error_string)
     else
