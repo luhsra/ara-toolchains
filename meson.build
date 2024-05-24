@@ -102,7 +102,7 @@ if not get_option('enable_arm').disabled()
   errors = []
 
   # gcc tools and libs
-  arm_tools = ['gcc', 'ar', 'ranlib', 'c++', 'size', 'objcopy', 'nm']
+  arm_tools = ['gcc', 'ar', 'ranlib', 'c++', 'size', 'objcopy', 'nm', 'ld']
   arm_tools_summary = []
   foreach tool : arm_tools
     arm_tool = find_program(arm_triple + '-' + tool, disabler: true, required:get_option('enable_arm'))
@@ -186,7 +186,7 @@ if not get_option('enable_riscv').disabled()
   errors = []
 
   # gcc tools and libs
-  riscv_tools = ['gcc', 'ar', 'ranlib', 'c++', 'size', 'objcopy', 'nm']
+  riscv_tools = ['gcc', 'ar', 'ranlib', 'c++', 'size', 'objcopy', 'nm', 'ld']
   riscv_tools_summary = []
   foreach tool : riscv_tools
     riscv_tool = find_program(riscv_triple + '-' + tool, disabler: true, required:get_option('enable_riscv'))
