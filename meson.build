@@ -221,6 +221,9 @@ if not get_option('enable_riscv').disabled()
   if not fs.exists(riscv_include_path)
     errors += f'riscv_include_path (@riscv_include_path@) is not a valid directory.'
   endif
+  if not fs.exists(riscv_include_path / 'stdlib.h')
+    errors += f'riscv_include_path (@riscv_include_path@) does not contain stdlib.h.'
+  endif
   if not fs.exists(riscv_link_path)
     errors += f'riscv_link_path (@riscv_link_path@) is not a valid directory.'
   endif
