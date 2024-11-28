@@ -111,7 +111,7 @@ if not get_option('enable_arm').disabled()
     arm_tools_summary += [{'key': tool, 'value': arm_tool}]
   endforeach
 
-  r = run_command(py3_inst, gcc_version, arm_gcc.path(), check: true)
+  r = run_command(py3_inst, gcc_version, arm_gcc.full_path(), check: true)
   if r.returncode() != 0
     error('Cannot execute arm_gcc')
   endif
@@ -195,7 +195,7 @@ if not get_option('enable_riscv').disabled()
     riscv_tools_summary += [{'key': tool, 'value': riscv_tool}]
   endforeach
 
-  r = run_command(py3_inst, gcc_version, riscv_gcc.path(), check: true)
+  r = run_command(py3_inst, gcc_version, riscv_gcc.full_path(), check: true)
   if r.returncode() != 0
     error('Cannot execute riscv_gcc')
   endif
